@@ -565,16 +565,14 @@ SIZE_T ParseTotalSize(PCOFFEE pCoffee,SIZE_T* stTotalSize,PSIZE_T pstBSSSize)
 
 LONG VectoredExceptionHandler(EXCEPTION_POINTERS* pExceptionInfo)
 {
-	if (pExceptionInfo->ExceptionRecord->ExceptionCode == 0xC0000005 || pExceptionInfo->ExceptionRecord->ExceptionCode == 0xC0000094)
-	{
-		printf("[!] Oops Bof Caused Exception, Redirecting ... :(\n");
-		pExceptionInfo->ContextRecord->Rip = (PVOID)ExitThread;
-		pExceptionInfo->ContextRecord->Rcx = 0;
-	}
-	else if (pExceptionInfo->ExceptionRecord->ExceptionCode == 0xE06D7363) // Some BOF Will Cause System Exception , we Need To Let it Go :P
+	if (pExceptionInfo->ExceptionRecord->ExceptionCode == 0xE06D7363) // Some BOF Will Cause System Exception , we Need To Let it Go :P
 	{
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
+	
+	printf("[!] Oops Bof Caused Exception, Redirecting ... :(\n");
+	pExceptionInfo->ContextRecord->Rip = (PVOID)ExitThread;
+	pExceptionInfo->ContextRecord->Rcx = 0;
 	return EXCEPTION_CONTINUE_EXECUTION;
 }
 
