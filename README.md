@@ -4,6 +4,8 @@
 
 A parser for COFF files.
 
+More details can be found here https://xz.aliyun.com/news/18434
+
 ## Features
 
 ### 1. BSS Table Parsing
